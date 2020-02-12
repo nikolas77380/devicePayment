@@ -1,0 +1,8 @@
+---
+
+- name: Check pysphere python module for managing vsphere VMs
+  become: yes
+  local_action: pip
+    name="{{ item }}"
+  with_items:
+    - pysphere

@@ -1,0 +1,28 @@
+- name: write into inventory (memory)
+  add_host: hostname={{DO_DROPLET_NAME}}
+            ansible_ssh_host={{item.ip_address}}
+            ansible_ssh_port=22
+            ansible_ssh_user=root
+            ansible_ssh_private_key_file=files/DO_firstkey
+            groups={{GROUP}}
+  when: item.type == 'public'
+  with_items:
+    - "{{do.droplet.networks.v4}}"
+  tags:
+    - droplet
+
+- name: Add "{{DO_DROPLET_NAME}}" into inventory list
+  local_action: lineinfile state={{STATE}} dest={{inventory_file}}
+    insertafter="^\[{{GROUP}}\]$"
+    regexp="^{{DO_DROPLET_NAME}}"
+    line="{{DO_DROPLET_NAME}} ansible_ssh_host={{item.ip_address}} ansible_ssh_user=root ansible_ssh_port=22 ansible_ssh_private_key_file=files/DO_firstkey"
+  when: STATE != 'absent' and item.type == 'public'
+  with_items:
+          - "{{do.droplet.networks.v4}}"
+  tags:
+    - droplet
+
+- name: Refresh inventory file
+  meta: refresh_inventory
+  tags:
+    - droplet

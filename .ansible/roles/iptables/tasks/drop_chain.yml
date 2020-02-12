@@ -1,0 +1,32 @@
+# Костыль чтобы правило DROP всегда было последним...
+---
+# Удаление правил дропа
+- name: drop roles
+  iptables_v2: comment="DROP"                                 chain=INPUT                                           jump=DROP state=absent
+  become: yes
+  changed_when: False
+  tags:
+        - iptables
+
+- name: drop roles
+  iptables_v2: comment="DROP"                                 chain=FORWARD                                         jump=DROP state=absent
+  become: yes
+  changed_when: False
+  tags:
+        - iptables
+
+# Установка последнего правила
+- name: drop roles
+  iptables_v2: comment="DROP"                                 chain=INPUT                                           jump=DROP state=present
+  become: yes
+  changed_when: False
+  tags:
+        - iptables
+
+- name: drop roles
+  iptables_v2: comment="DROP"                                 chain=FORWARD                                         jump=DROP state=present
+  become: yes
+  changed_when: False
+  tags:
+        - iptables
+

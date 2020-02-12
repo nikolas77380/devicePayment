@@ -1,0 +1,10 @@
+- name: Synchronize timezone "{{timezone}}" to /etc/localtime
+  become: yes
+  synchronize: src=/usr/share/zoneinfo/{{timezone}} dest=/etc/localtime
+  changed_when: false
+
+- name: Set /etc/timezone to {{timezone}}
+  become: yes
+  template: dest=/etc/timezone src=timezone.j2
+  changed_when: false
+  notify: update tzdata

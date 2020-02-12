@@ -1,0 +1,8 @@
+ipset_IP_List:
+  - { ip: 217.77.221.128,  state: present } # WildPark
+  - { ip: 144.76.115.42,   state: present } # CI01
+  - { ip: 148.251.67.166,  state: present } # CI02
+  - { ip: 213.227.245.107, state: present } # Vega
+  - { ip: 36.237.20.144, state: present } # ExtraWest
+root_mail_forward: bratel47@gmail.com
+

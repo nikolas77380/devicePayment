@@ -1,0 +1,59 @@
+# Настройка правил
+---
+- include: "{{ ansible_os_family }}_{{ ansible_distribution }}_{{ ansible_distribution_version }}.yml"
+
+# Опятьже костылина
+- name: Flush iptables rules
+  shell: iptables -P INPUT ACCEPT && iptables -P OUTPUT ACCEPT && iptables -P FORWARD ACCEPT && iptables -F && iptables -X && iptables -F -t nat && iptables -X -t nat
+  become: yes
+  when: iptables_flush is defined and iptables_flush|bool
+  tags:
+        - iptables
+
+- include: ipset_rules.yml
+  tags:
+        - ipset
+
+- name: check docker is installed
+  become: yes
+  command: which docker
+  register: docker_installed
+  ignore_errors: True
+  changed_when: docker_installed.rc|bool
+  tags:
+        - iptables
+        - docker
+
+- include: docker_rules.yml
+  when: not docker_installed.rc|bool
+  notify: iptables save
+  tags:
+        - iptables
+        - docker
+
+- include: common_rules.yml
+  notify: iptables save
+  tags:
+        - iptables
+
+- name: Set rules for this host
+  iptables_v2: >
+        destination_port={{item.value.dst_port}}
+        comment={{item.key}}
+        chain={{item.value.chain}}
+        protocol={{item.value.proto}}
+        match={{item.value.proto}}
+        ctstate=NEW
+        jump={{item.value.policy}}
+        state={{item.value.state}}
+  become: yes
+  with_dict: "{{ iptables | default({}) }}"
+  notify: iptables save
+  tags:
+        - iptables
+
+- name: Set debug rules
+  include: debug_rules.yml
+  when: iptables_log is defined and iptables_log|bool
+
+- include: drop_chain.yml

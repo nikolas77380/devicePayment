@@ -1,0 +1,5 @@
+- name: sudo wo password
+  become: yes
+  lineinfile: "dest=/etc/sudoers state=present line='%sudo ALL=(ALL) NOPASSWD: ALL'"
+  tags:
+    - baseconf

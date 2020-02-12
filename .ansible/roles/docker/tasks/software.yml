@@ -1,0 +1,55 @@
+- name: Check docker config dir
+  become: yes
+  file: dest=/etc/default/ state=directory mode=0755
+  tags:
+    - docker
+
+- name: Check docker config
+  become: yes
+  file: dest=/etc/default/docker state=touch mode=0644
+  tags:
+    - docker
+
+- name: Configure docker for no use iptables
+  become: yes
+  action: lineinfile dest=/etc/default/docker regexp="DOCKER_OPTS=" line='DOCKER_OPTS="--iptables=false"' state=present
+  notify: restart docker
+  tags:
+    - docker
+
+- name: add specified repository into sources list
+  apt_repository: repo='deb https://apt.dockerproject.org/repo ubuntu-{{ansible_distribution_release}} main' state=present
+  become: yes
+  tags:
+    - docker
+
+- name: Add an Apt signing key, uses whichever key is at the URL
+  apt_key: url=https://apt.dockerproject.org/gpg state=present validate_certs=no
+  become: yes
+  tags:
+    - docker
+
+- name: update repositories cache and install "docker-engine" package
+  apt: name=docker-engine update_cache=yes
+  become: yes
+  notify: start docker
+  tags:
+    - docker
+
+- name: python packet manager install
+  apt: name=python-pip
+  become: yes
+  tags:
+    - docker
+
+- name: python module docker-py install
+  pip: name=docker-py version=1.9.0
+  become: yes
+  tags:
+    - docker
+
+- name: docker start
+  become: yes
+  service: name=docker state=started
+  tags:
+    - docker

@@ -1,0 +1,25 @@
+- name: Container "{{DOCKER_name}}" check
+  become: yes
+  shell: docker ps -af name='{{DOCKER_name}}' --format 'table {% raw %}{{.Names}}{% endraw %}' | grep -oE "^{{DOCKER_name}}$"
+  register: dc
+  changed_when: false
+  ignore_errors: yes
+
+- include: docker_vm_{{DOCKER_state}}.yml
+  when: >
+    DOCKER_state in [ 'restarted', 'absent', 'reloaded' ]
+    and not dc.rc|bool
+
+- name: Container "{{DOCKER_name}}" check
+  become: yes
+  shell: docker ps -af name='{{DOCKER_name}}' --format 'table {% raw %}{{.Names}}{% endraw %}' | grep -oE "^{{DOCKER_name}}$"
+  register: dc
+  changed_when: false
+  ignore_errors: yes
+  when: >
+    DOCKER_state in [ 'present', 'reloaded' ]
+
+- include: docker_vm_run.yml
+  when: >
+    DOCKER_state in [ 'present', 'reloaded' ]
+    and dc.rc|bool

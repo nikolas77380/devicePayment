@@ -1,0 +1,9 @@
+- include: hostname.yml
+- include: software.yml
+- include: ssh_setup.yml
+- include: sudo_setup.yml
+- include: timezone.yml
+- include: ntp.yml
+- include: postfix.yml
+  tags:
+    - postfix

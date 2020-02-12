@@ -1,0 +1,12 @@
+- name: iptables start
+  service: >
+    name="{{pfpers_srv}}"
+    state=started
+    enabled=yes
+  become: yes
+
+- name: iptables save
+  command: service {{pfpers_srv}} save && echo $?
+  become: yes
+  changed_when: false
+  notify: iptables start

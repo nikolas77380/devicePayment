@@ -1,0 +1,16 @@
+# Обновить root email на всех хостах.
+- hosts: all:!localhost
+  become: yes
+
+  vars_files:
+    - "files/SECRET.yml"
+    - "{{inventory_file}}.conf"
+
+  tasks:
+    - include: roles/common/tasks/postfix.yml
+
+  handlers:
+    - name: newaliases
+      command: newaliases
+      changed_when: false
+

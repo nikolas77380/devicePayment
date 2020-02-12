@@ -1,0 +1,67 @@
+- name: Get active ipset name's list
+  command: ipset -n list
+  register: ipset_list
+  become: yes
+  changed_when: False
+  tags:
+        - ipset
+
+- name: Create ipset tables
+  command: ipset -N allowIP iphash
+  when: not "allowIP" in ipset_list.stdout_lines
+  become: yes
+  tags:
+        - ipset
+
+- name: Setup ipset tables INPUT
+  iptables_v2: comment="Rules for allow IP" chain=INPUT match=set match_set=allowIP match_set_type=src jump=ACCEPT state=present
+  become: yes
+  tags:
+        - ipset
+
+- name: Setup ipset tables OUTPUT
+  iptables_v2: comment="Rules for allow IP" chain=OUTPUT match=set match_set=allowIP match_set_type=dst jump=ACCEPT state=present
+  become: yes
+  tags:
+        - ipset
+
+# Get ip's from inventory list
+- name: Get allow iplist (from inventory)
+  local_action: shell grep -oE "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" "{{inventory_file}}" | sort -ur
+  register: ipset_iplist
+  changed_when: False
+  when: ipset_from_inventory is defined and ipset_from_inventory|bool
+  tags:
+        - ipset
+
+- name: Test/Set allow iplist (from inventory)
+  shell: ( ipset test allowIP {{item}} ) || ( ipset add allowIP {{item}} )
+  become: yes
+  with_items: '{{ipset_iplist.stdout_lines|default([])}}'
+  register: ipset_IN_result
+  changed_when: ipset_IN_result.rc == 1
+  failed_when: False
+  tags:
+        - ipset
+
+- name: Test/Set allow iplist
+  shell: bash -c "( if [[ \"{{item.state}}\" == \"present\" ]]; then ( ipset test allowIP {{item.ip}} ) || ( ipset add allowIP {{item.ip}} ); else ( ( ipset test allowIP {{item.ip}} ) && ( ipset del allowIP {{item.ip}}) ); fi )"
+  become: yes
+  with_items: '{{ipset_IP_List|default([])}}'
+  register: ipset_IP_List_result
+  changed_when: ipset_IP_List_result.rc == 1
+  failed_when: False
+  tags:
+        - ipset
+
+#- name: Test/Remove from allow iplist
+#  command: (  ( ipset test allowIP {{item.ip}} ) && ( ipset del allowIP {{item.ip}}) )
+#  become: yes
+#  register: ipset_IP_List_result
+#  with_items: '{{ipset_IP_List|default([])}}'
+#  when: not item.state == "present"
+#  failed_when: False
+#  changed_when: ipset_IP_List_result.rc == 0
+#  tags:
+#        - ipset
+

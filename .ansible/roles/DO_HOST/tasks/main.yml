@@ -1,0 +1,27 @@
+- name: Check droplet "{{DO_DROPLET_NAME}}" in the inventory list
+  shell: grep -o '{{DO_DROPLET_NAME}}' {{inventory_file}} 2>&1 > /dev/null
+  register: droplet_registred
+  ignore_errors: True
+  changed_when: not droplet_registred.rc|bool
+  tags:
+    - droplet
+
+- name: Add group "{{GROUP}}" into inventory list
+  local_action: lineinfile state=present dest={{inventory_file}} line="[{{GROUP}}]"
+  when: GROUP is defined
+  tags:
+    - droplet
+
+- include: get_host.yml
+  when: droplet_registred is undefined or droplet_registred.rc|bool or STATE == 'absent'
+
+- name: Remove "{{DO_DROPLET_NAME}}" from inventory list
+  local_action: lineinfile state=absent dest={{inventory_file}} regexp="^{{DO_DROPLET_NAME}}"
+  when: STATE == 'absent'
+  tags:
+    - droplet
+
+- name: Refresh inventory file
+  meta: refresh_inventory
+  tags:
+    - droplet

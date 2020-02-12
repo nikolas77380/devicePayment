@@ -1,0 +1,63 @@
+---
+ulimit_folder: "/etc/security/limits.d/"
+
+#ulimit_config: []
+
+#Example:
+ulimit_config:
+  - name: mysql
+    limits:
+      - domain: mysql
+        type: soft
+        item: nofile
+        value:  32000
+      - domain: mysql
+        type: hard
+        item: nofile
+        value: 64000
+      - domain: mysql
+        type: soft
+        item: cpu
+        value: unlimited
+      - domain: mysql
+        type: hard
+        item: cpu
+        value: unlimited
+      - domain: mysql
+        type: soft
+        item: nproc
+        value: 32000
+      - domain: mysql
+        type: hard
+        item: nproc
+        value: 64000
+      - domain: mysql
+        type: soft
+        item: rss
+        value: -1
+      - domain: mysql
+        type: hard
+        item: rss
+        value: -1
+      - domain: mysql
+        type: soft
+        item: fsize
+        value: -1
+      - domain: mysql
+        type: hard
+        item: fsize
+        value: -1
+
+
+#mongodb soft rss -1
+#mongodb hard nproc 64000
+#mongodb soft nproc 32000
+#mongodb hard cpu unlimited
+#mongodb soft cpu unlimited
+#mongodb hard rss -1
+#mongodb soft fsize -1
+#mongodb soft as -1
+#mongodb hard as -1
+#mongodb hard nofile 64000
+#mongodb hard fsize -1
+

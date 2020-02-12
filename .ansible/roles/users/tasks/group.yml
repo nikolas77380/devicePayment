@@ -1,0 +1,14 @@
+- name: get groupname
+  delegate_to: localhost
+  shell: grep "group:" files/SECRET.yml | awk '{print $2}' | tr ',' '\n' | sort -u
+  register: g
+  changed_when: false
+
+- name: create groups
+  become: yes
+  group: >
+    state=present
+    name='{{ item }}'
+  with_items: "{{ g.stdout_lines }}"
+  tags:
+    - group

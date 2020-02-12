@@ -1,0 +1,27 @@
+---
+
+- name: Add group "vsphereVM" into inventory list
+  local_action: lineinfile
+    state=present
+    dest="{{ inventory_file }}"
+    line='[vsphereVM]'
+
+- name: Add "{{ VSPHERE_vm_name }}" into inventory list
+  local_action: lineinfile
+    state=present
+    dest="{{ inventory_file }}"
+    insertafter="^\[vsphereVM\]$"
+    regexp="^{{ VSPHERE_vm_name }}"
+    line="{{ VSPHERE_vm_name }} ansible_ssh_host={{ ipv4address }} ansible_ssh_user=root ansible_ssh_port=22 ansible_ssh_pass=root"
+  when: VSPHERE_vm_state != 'absent'
+
+- name: Remove "{{ VSPHERE_vm_name }}" from inventory list
+  local_action: lineinfile
+    state=absent
+    dest="{{ inventory_file }}"
+    insertafter="^\[vsphereVM\]$"
+    regexp="^{{ VSPHERE_vm_name }}"
+  when: VSPHERE_vm_state == 'absent'
+
+- name: Refresh inventory file
+  meta: refresh_inventory

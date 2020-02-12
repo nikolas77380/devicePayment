@@ -1,0 +1,46 @@
+- name: install proftpd package
+  become: yes
+  apt: pkg={{ item }}
+  changed_when: False
+  with_items:
+    - proftpd
+  tags:
+    - proftpd
+
+- name: create configuration file proftpd.conf
+  become: yes
+  template: src=proftpd.conf.j2 dest=/etc/proftpd/proftpd.conf
+  notify: restart proftpd
+  tags:
+    - proftpd
+
+- name: create directory
+  become: yes
+  file: >
+    path={{item}}
+    owner=proftpd
+    group=nogroup
+    mode=0750
+    state=directory
+  with_items:
+    - /var/log/proftpd
+
+- name: create files
+  become: yes
+  file: >
+    path={{item}}
+    owner=proftpd
+    group=nogroup
+    mode=0750
+    state=touch
+  with_items:
+    - /var/run/proftpd.delay
+    - /var/run/proftpd.pid
+    - /etc/passwd.proftpd
+
+- name: load nf_contrack module
+  become: yes
+  changed_when: False
+  command: modprobe nf_conntrack_ftp
+  tags:
+    - proftpd

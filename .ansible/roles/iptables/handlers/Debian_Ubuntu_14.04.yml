@@ -1,0 +1,9 @@
+- name: iptables start
+  service: name=iptables-persistent state=started enabled=yes
+  become: yes
+
+- name: iptables save
+  shell: service iptables-persistent save
+  become: yes
+  notify: iptables start
+

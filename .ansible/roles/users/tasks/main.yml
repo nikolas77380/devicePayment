@@ -1,0 +1,24 @@
+# users creation
+---
+
+- include: root.yml
+  tags:
+    - users
+    - root_user
+    - user_root
+    - root
+
+- include: group.yml
+
+- include: users.yml
+  with_items:
+    - "{{ user_groups }}"
+  loop_control:
+    loop_var: usr_group
+
+- include: authkey.yml
+  with_items:
+    - "{{ user_groups }}"
+  loop_control:
+    loop_var: usr_group
+

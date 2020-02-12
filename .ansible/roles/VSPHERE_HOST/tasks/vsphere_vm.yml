@@ -1,0 +1,3 @@
+---
+
+- include: vsphere_vm_{{ VSPHERE_vm_state }}.yml

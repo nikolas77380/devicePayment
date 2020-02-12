@@ -1,0 +1,40 @@
+- set_fact: 
+    pfpers_srv: netfilter-persistent
+
+- name: Check installed iptables service
+  apt: name="{{item}}"
+  become: yes
+  with_items:
+        - iptables
+        - iptables-persistent
+        - ipset
+#  notify: iptables save
+  tags:
+        - ipset
+        - iptables
+
+# Тут вот костыль ещё один для бубна... Оно ссцука не сохраняет правила ipset... Тварь...
+- lineinfile: >
+        state=present
+        dest=/etc/init.d/netfilter-persistent
+        line='ipset save > /etc/ipset.rules'
+        insertafter='log_action_begin_msg "Saving netfilter rules"'
+#        insertbefore='#save IPv4 rules'
+#        backup=yes
+  become: yes
+  tags:
+        - ipset
+        - iptables
+
+- lineinfile: >
+        state=present
+        dest=/etc/init.d/netfilter-persistent
+        line='ipset restore < /etc/ipset.rules'
+        insertafter='log_action_begin_msg "Loading netfilter rules"'
+#        insertbefore='if [ ! -f /etc/iptables/rules.v4 ]; then'
+#        backup=yes
+  become: yes
+  tags:
+        - ipset
+        - iptables
+

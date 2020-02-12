@@ -1,0 +1,12 @@
+---
+- name: Set system limits
+  with_items: "{{ ulimit_config }}"
+  when: item.limits is defined
+  template:
+    src: limits.conf.j2
+    dest: "{{ ulimit_folder }}{{ item.name }}-limits.conf"
+    owner: root
+    group: root
+    force: yes
+    mode: 0644
+  tags: ulimit

@@ -1,0 +1,9 @@
+# Обновить IPSET на всех хостах.
+- hosts: all:!localhost
+  vars_files:
+    - "files/SECRET.yml"
+    - "{{inventory_file}}.conf"
+  vars:
+    ipset_from_inventory: yes
+  tasks:
+    - include: roles/iptables/tasks/ipset_rules.yml

@@ -1,0 +1,78 @@
+- name: Container "{{DOCKER_name}}" run
+  become: yes
+  shell: >
+    docker run \
+
+    {% if DOCKER_restart_policy is defined and DOCKER_restart_policy in ['on-failure[:*]', 'always', 'unless-stopped' ] -%}
+        --restart='{{DOCKER_restart_policy}}'
+    {%- else -%}
+        --restart='no'
+    {%- endif %}
+
+    {% if DOCKER_detach is defined and DOCKER_detach|bool -%}
+        -d
+    {%- else %}
+        -i
+    {%- endif %}
+
+    {% if DOCKER_remove is defined and DOCKER_remove|bool -%}
+       --rm
+    {%- endif %}
+
+    {% if DOCKER_hostname is defined -%}
+       --hostname '{{DOCKER_hostname}}{% if DOCKER_domainname is defined %}.{{DOCKER_domainname}}{% endif %}'
+    {%- endif %}
+
+    {% if DOCKER_name is defined -%}
+       --name '{{DOCKER_name}}'
+    {%- endif %}
+
+    {% if DOCKER_privileged is defined and DOCKER_privileged|bool -%}
+       --privileged
+    {%- endif %}
+
+    {% if DOCKER_env is defined -%}
+       {%- for key, value in DOCKER_env.items() %}
+          -e '{{key}}={{value}}'
+       {%- endfor %}
+    {%- endif %}
+
+    {% if DOCKER_volumes is defined -%}
+       {%- for item in DOCKER_volumes %}
+          -v '{{item}}'
+       {%- endfor %}
+    {%- endif %}
+
+    {% if DOCKER_volumes_from is defined -%}
+       {% for item in DOCKER_volumes_from %}
+          --volumes-from '{{item}}'
+       {%- endfor %}
+    {%- endif %}
+
+    {% if DOCKER_links is defined -%}
+       {%- for item in DOCKER_links %}
+          --link '{{item}}'
+       {%- endfor %}
+    {%- endif %}
+
+    {% if DOCKER_ports is defined -%}
+       {% for item in DOCKER_ports %}
+          -p '{{item}}'
+       {%- endfor %}
+    {%- endif %}
+
+    {% if ENV in ['intwrs'] -%}
+      --log-driver=gelf --log-opt gelf-address=udp://{{ ansible_ssh_host }}:12201 --log-opt tag='{{ENV}}.{{DOCKER_name}}'
+    {%- endif %}
+
+    {% if ENV == 'prod' -%}
+      --log-driver=syslog --log-opt tag='{{ENV}}.{{DOCKER_name}}'
+    {%- endif %}
+
+    {{DOCKER_image}} \
+
+    {% if DOCKER_command is defined -%}
+      {{DOCKER_command}}
+    {%- endif %}
+  register: shell_dc
+  changed_when: false

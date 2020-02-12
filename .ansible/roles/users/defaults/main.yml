@@ -1,0 +1,6 @@
+user_groups:
+  - { group: DevOps,        state: yes }
+  - { group: support,       state: no  }
+  - { group: developers,    state: no  }
+  - { group: sstdeveloper,  state: no  }
+  - { group: wrsdeveloper,  state: no  }

@@ -1,0 +1,11 @@
+[all:vars]
+ENV = dev
+STATE = present
+LOG_LEVEL = DEBUG
+DO_DROPLET_REGION = nyc3
+USERS_DEVELOPERS = no
+USERS_SUPPORT = no
+
+
+[wp]
+dev.mytefl.com ansible_ssh_host=138.68.72.114 ansible_ssh_port=7272

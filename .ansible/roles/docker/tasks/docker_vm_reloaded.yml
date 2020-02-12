@@ -1,0 +1,6 @@
+- name: Container "{{DOCKER_name}}" pull
+  become: yes
+  shell: docker pull '{{DOCKER_image}}'
+  register: shell_dc
+
+- include: docker_vm_absent.yml

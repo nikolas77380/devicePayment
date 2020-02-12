@@ -1,0 +1,13 @@
+---
+- name: set up authorized_keys for {{ usr_group.group }}
+  become: yes
+  become_user: "{{ item.value.name }}"
+  authorized_key: >
+    user={{ item.value.name }}
+    key="{{ lookup('file', item.value.keyfile)}}"
+    state='present'
+    exclusive=yes
+  with_dict: "{{ users }}"
+  when: users is defined and usr_group.group in item.value.group and usr_group.state|bool and item.value.state == 'present'
+  tags:
+   - users

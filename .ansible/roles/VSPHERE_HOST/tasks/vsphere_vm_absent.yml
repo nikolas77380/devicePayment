@@ -1,0 +1,11 @@
+---
+
+- name: Delete virtual machine "{{ VSPHERE_vm_name }}"
+  vsphere_guest:
+    vcenter_hostname: "{{ VSPHERE_host }}"
+    username:         "{{ VSPHERE_user }}"
+    password:         "{{ VSPHERE_passwd }}"
+    guest:            "{{ VSPHERE_vm_name }}"
+    state:            "{{ VSPHERE_vm_state }}"
+    force: yes
+    validate_certs: False

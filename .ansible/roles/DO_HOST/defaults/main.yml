@@ -1,0 +1,12 @@
+DO_DROPLET_SIZE:            512mb
+DO_DROPLET_IMAGE:           ubuntu-14-04-x64
+DO_DROPLET_REGION:          nyc3
+DO_DROPLET_NAME:            test1 
+DO_DROPLET_STATE:           active
+DO_DROPLET_COMMAND:         droplet
+DO_DROPLET_UNIQUE_NAME:     yes
+DO_DROPLET_PRIVATE_NETWORK: yes
+
+DO_WAIT_TIMEOUT:            1800
+
+GROUP:                      Ansible_controlled

@@ -1,0 +1,26 @@
+iptables_flush: yes
+iptables:
+  HTTP:
+    dst_port: 80
+    chain:    INPUT
+    proto:    tcp
+    policy:   ACCEPT
+    state:    present
+  HTTPs:
+    dst_port: 443
+    chain:    INPUT
+    proto:    tcp
+    policy:   ACCEPT
+    state:    present
+  SSH_CUSTOM:
+    dst_port: 7272
+    chain:    INPUT
+    proto:    tcp
+    policy:   ACCEPT
+    state:    present
+  SSH:
+    dst_port: 22
+    chain:    INPUT
+    proto:    tcp
+    policy:   ACCEPT
+    state:    present

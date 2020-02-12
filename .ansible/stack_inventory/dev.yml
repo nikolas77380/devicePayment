@@ -1,0 +1,11 @@
+## Создание стека
+
+# Деплой всей схемы с разворотом базы из дампа
+# time ansible-playbook -i stack_inventory/dev wp_stack.yml -u root -e wp_db_init=true -D  -vv
+
+# Реинициализация базы из дампа - при прогоне старые данные бекапятся в /tmp
+# time ansible-playbook -i stack_inventory/dev wp_stack.yml -u root -e wp_db_init=true -D  -vv --tags=dump
+
+# Деплой только репа с WP
+# time ansible-playbook -i stack_inventory/dev wp_stack.yml -u root  -D  -vv --tags=deploy
+---

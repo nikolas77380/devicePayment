@@ -1,0 +1,57 @@
+- name: software check
+  apt: name={{item}} update_cache=yes
+  become: yes
+  with_items:
+    - python-apt
+    - apt
+    - sudo
+    - aptitude
+    - vim
+    - git
+    - screen
+    - sysstat
+    - atop
+    - htop
+    - curl
+    - wget
+    - sed
+    - python-httplib2
+    - lsof
+    - mc
+    - byobu
+    - python-lxml
+  tags:
+    - common
+
+- name: set vim as default text editor
+  become: yes
+  command: update-alternatives --set editor /usr/bin/vim.basic
+  changed_when: False
+  tags:
+    - common
+
+# PUPPET HARD CODE
+- name: get packege list for hold
+  become: yes
+  command: 'dpkg --get-selections | grep linux-image | grep -v hold | cut -f1'
+  register: packegeList
+  changed_when: "packegeList.rc >= 2"
+  tags:
+    - common
+
+- name: hold package
+  become: yes
+  command: echo {{item}} hold | dpkg --set-selections
+  with_items: "{{packegeList.stdout_lines}}"
+  changed_when: False
+  tags:
+    - common
+# PUPPET HARD CODE
+
+#- name: add custom repo
+#  become: yes
+#  apt_repository: repo='deb http://debian.cdpproduction.cc/custom/ custom main' state=present
+#
+#- name: add custom key
+#  become: yes
+#  apt_key: url=http://debian.cdpproduction.cc/custom/repokey.asc state=present

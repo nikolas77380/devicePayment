@@ -1,0 +1,36 @@
+- name: restart_sshd
+  become: yes
+  service: name=ssh state=restarted
+  tags:
+    - common
+
+- name: update tzdata
+  become: yes
+  command: dpkg-reconfigure --frontend noninteractive tzdata
+  changed_when: false
+
+## TODO: double check
+- name: write into inventory
+  local_action: lineinfile dest={{inventory_file}}
+    regexp="^{{inventory_hostname}}.*$"
+    line="{{inventory_hostname}} ansible_ssh_host={{ansible_ssh_host}} ansible_ssh_port=7272"
+    state=present
+  tags:
+    - common
+
+- name: Refresh inventory file
+  meta: refresh_inventory
+  tags:
+    - common
+
+- name: newaliases
+  become: yes
+  command: newaliases
+  changed_when: false
+  tags:
+    - common
+    - postfix
+
+- name: restart ntp
+  become: yes
+  service: name=ntp state=restarted

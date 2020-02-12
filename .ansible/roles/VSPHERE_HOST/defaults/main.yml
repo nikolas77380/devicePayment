@@ -1,0 +1,9 @@
+---
+
+VSPHERE_vm_name: newvm003
+VSPHERE_vm_state: present
+VSPHERE_template: ubuntu-16.04-lts-server
+VSPHERE_vm_folder: intwrs
+VSPHERE_vm_storage_gb: 20
+VSPHERE_vm_memory_mb: 2048
+VSPHERE_vm_num_cpus: 1

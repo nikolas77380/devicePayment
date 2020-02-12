@@ -1,0 +1,42 @@
+- name: LOG chain=PREROUTING
+  iptables_v2: comment="LOG" table=nat                       chain=PREROUTING                                      jump=LOG state=present
+  become: yes
+  tags:
+        - iptables
+        - debug
+
+- name: LOG chain=POSTROUTING
+  iptables_v2: comment="LOG" table=nat                       chain=POSTROUTING                                     jump=LOG state=present
+  become: yes
+  tags:
+        - iptables
+        - debug
+
+- name: LOG chain=INPUT
+  iptables_v2: comment="LOG" table=nat                       chain=INPUT                                           jump=LOG state=present
+  become: yes
+  tags:
+        - iptables
+        - debug
+
+- name: LOG chain=OUTPUT
+  iptables_v2: comment="LOG" table=nat                       chain=OUTPUT                                          jump=LOG state=present
+  become: yes
+  tags:
+        - iptables
+        - debug
+
+- name: LOG chain=INPUT
+  iptables_v2: comment="LOG"                                 chain=INPUT                                           jump=LOG state=present
+  become: yes
+  tags:
+        - iptables
+        - debug
+
+- name: LOG chain=FORWARD
+  iptables_v2: comment="LOG"                                 chain=FORWARD                                         jump=LOG state=present
+  become: yes
+  tags:
+        - iptables
+        - debug
+

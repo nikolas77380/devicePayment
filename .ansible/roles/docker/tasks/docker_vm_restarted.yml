@@ -1,0 +1,4 @@
+- name: Container "{{DOCKER_name}}" restart
+  become: yes
+  shell: docker restart {{DOCKER_name}}
+  register: shell_dc

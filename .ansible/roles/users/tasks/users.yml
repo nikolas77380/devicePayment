@@ -1,0 +1,33 @@
+---
+- name: "Check {{ usr_group.group }} users"
+  become: yes
+  user: >
+    state='{{ item.value.state if usr_group.state|bool else 'absent' }}'
+    name='{{item.value.name }}'
+    groups='{{ item.value.group }}'
+    home='{{ item.value.home }}'
+    append='{{ item.value.append | default('yes') }}'
+    comment='{{ item.value.comment }}'
+    createhome='{{ item.value.createhome | default('yes') }}'
+    generate_ssh_key='{{ item.value.generate_ssh_key | default('yes') }}'
+    shell='{{ item.value.shell | default('/bin/bash') }}'
+    password='{{ item.value.password | default('') }}'
+    update_password='{{ item.value.update_password | default('on_create') }}'
+  with_dict: "{{ users }}"
+  when: users is defined and usr_group.group in item.value.group
+  tags:
+    - users
+
+- name: Set owners
+  become: yes
+  file: >
+    path='{{ item.value.home}}'
+    group='{{ item.value.name }}'
+    owner='{{ item.value.name }}'
+    state=directory
+    recurse=true
+  with_dict: "{{ users }}"
+  when: users is defined and usr_group.group in item.value.group and usr_group.state|bool and item.value.state == 'present'
+  tags:
+    - users
+

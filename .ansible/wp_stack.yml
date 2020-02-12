@@ -1,0 +1,23 @@
+- hosts: wp
+  become: yes
+  vars_files:
+    - "files/SECRET.yml"
+    - "{{inventory_file}}.conf"
+
+#  - include: node_setup.yml
+#  - include: root_email.yml
+#  - include: iptables.yml
+#  - include: ipset_update.yml
+
+  roles:
+     - geerlingguy.apache
+     - geerlingguy.mysql
+     - Caph.ulimit
+     - geerlingguy.php
+     - geerlingguy.php-mysql
+     - geerlingguy.phpmyadmin
+     - darthwade.wordpress
+     - holland
+#     - darthwade.wordpress-apache
+
+

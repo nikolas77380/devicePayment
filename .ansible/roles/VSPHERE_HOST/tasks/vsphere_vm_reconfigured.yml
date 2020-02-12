@@ -1,0 +1,22 @@
+---
+
+- include: vsphere_vm_created.yml
+
+- name: Reconfigure virtual machine "{{ VSPHERE_vm_name }}"
+  vsphere_guest:
+    vcenter_hostname: "{{ VSPHERE_host }}"
+    username:         "{{ VSPHERE_user }}"
+    password:         "{{ VSPHERE_passwd }}"
+    guest:            "{{ VSPHERE_vm_name }}"
+    state:            "{{ VSPHERE_vm_state }}"
+    force: yes
+    validate_certs: False
+    vm_extra_config:
+      vcpu.hotadd: yes
+      mem.hotadd: yes
+    vm_disk:
+      disk1:
+        size_gb: "{{ VSPHERE_vm_storage_gb }}"
+    vm_hardware:
+      memory_mb: "{{ VSPHERE_vm_memory_mb }}"
+      num_cpus:  "{{ VSPHERE_vm_num_cpus }}"

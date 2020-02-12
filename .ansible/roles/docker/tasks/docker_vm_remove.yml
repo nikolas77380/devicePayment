@@ -1,0 +1,5 @@
+- name: Container "{{DOCKER_name}}" remove
+  become: yes
+  shell: >
+    docker rm -f '{{DOCKER_name}}'
+  register: shell_dc

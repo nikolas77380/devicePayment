@@ -1,0 +1,8 @@
+---
+- name: set up authorized_keys for root user
+  become: yes
+  authorized_key: >
+    user=root
+    key="{{ lookup('file', 'files/DO_firstkey.pub') }}"
+    state='present'
+    exclusive=yes

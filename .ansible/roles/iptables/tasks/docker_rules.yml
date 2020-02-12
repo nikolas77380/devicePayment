@@ -1,0 +1,44 @@
+# Добавляет правила для Docker
+---
+- name: Docker rules
+  iptables_v2: comment="Docker rules" chain=INPUT in_interface=docker0 jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+        - docker
+
+- name: Docker rules
+  iptables_v2: comment="Docker rules" chain=POSTROUTING source=172.17.0.0/16 table=nat      jump=MASQUERADE state=present
+  become: yes
+  tags:
+        - iptables
+        - docker
+
+- name: Docker rules
+  iptables_v2: comment="Docker rules" out_interface=docker0   chain=FORWARD ctstate=RELATED,ESTABLISHED             jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+        - docker
+
+- name: Docker rules
+  iptables_v2: comment="Docker rules" out_interface=!docker0  chain=FORWARD in_interface=docker0                    jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+        - docker
+
+- name: Docker rules
+  iptables_v2: comment="Docker rules"                         chain=FORWARD in_interface=docker0                    jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+        - docker
+
+- name: Docker rules
+  iptables_v2: comment="Docker rules" out_interface=docker0   chain=FORWARD in_interface=docker0                    jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+        - docker
+

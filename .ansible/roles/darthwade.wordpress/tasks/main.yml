@@ -1,0 +1,101 @@
+---
+- name: dump Dir | Ensure that installation directory exists
+  file: path="{{wp_repo_clone_home}}/dump" state=directory
+  when: wp_db_init | match("true")
+  tags: dump, deploy
+
+- name: copy MYSQL DUMP
+  copy: src="{{ wp_dump_name }}" dest="{{ wp_repo_clone_home }}/{{ wp_dump_name }}" owner="{{ migration_user }}" group="{{ migration_user }}" mode=0600
+  when: wp_db_init | match("true")
+  tags: dump, deploy
+
+- name: Dump WP databases to /tmp/mysql_backup_{{ ansible_date_time.epoch }}.sql
+  mysql_db:
+    state: dump
+    name: "{{ wp_db_name }}"
+    target: "/tmp/mysql_backup_{{ ansible_date_time.epoch }}.sql"
+  when: wp_db_init | match("true")
+  tags: dump, deploy
+
+- name: Restore wp database
+  mysql_db:
+    name: "{{ wp_db_name }}"
+    state: import
+    target: "{{ wp_repo_clone_home }}/{{ wp_dump_name }}"
+  when: wp_db_init | match("true")
+  tags: dump, deploy
+
+#mysql -e "use wordpress; UPDATE wp_options SET option_value = 'https://mywebsite.com' WHERE option_name = 'siteurl'; UPDATE wp_options SET option_value = 'http://mywebsite.com' WHERE option_name = 'home';"
+
+- name: Mysql reset WP Domain Name !!!!
+  command: /usr/bin/mysql -e "use {{ wp_db_name }}; UPDATE wp_options SET option_value = "\'https://{{ prod_domain }}\'" WHERE option_name = 'siteurl'; UPDATE wp_options SET option_value = "\'https://{{ prod_domain }}\'" WHERE option_name = 'home';"
+  when: wp_db_init | match("true")
+  tags: dump, deploy
+ 
+- name: Wordpresss | Ensure that installation directory exists
+  file: path={{wp_install_dir|dirname}} state=directory
+
+- name: Wordpresss | Download {{wp_version}} to /tmp
+  get_url: url=http://wordpress.org/wordpress-{{wp_version}}.tar.gz force=no dest=/tmp/wordpress-{{wp_version}}.tar.gz
+  # TODO sha256sum="{{ wp_sha256sum }}"
+
+- name: Wordpresss | Extract archive
+  unarchive: src=/tmp/wordpress-{{wp_version}}.tar.gz dest=/tmp copy=no
+
+- name: check key dir
+  file: path=~{{ migration_user }}/.ssh owner="{{ migration_user }}" group="{{ migration_user }}" mode=0750 state=directory
+
+#- name: copy deploy key
+#  copy: src=deploy_gitlab.cdp.cc.key dest=~{{ migration_user }}/.ssh/deploy_gitlab.cdp.cc.key owner="{{ migration_user }}" group="{{ migration_user }}" mode=0600
+
+- name: check dir
+  file: path="{{ wp_repo_clone_home }}" owner="{{ migration_user }}" group="{{ migration_user }}" mode=0755 state=directory
+
+- name: check git repo
+  git: >
+    repo="{{ wp_repo_src }}"
+    dest="{{ wp_repo_clone_home }}/wp-repo"
+    clone=yes
+    update=yes
+    force=yes
+  tags: deploy
+
+- name: Wordpresss | Move extracted directory to {{wp_install_dir}}
+  command: /bin/mv /tmp/wordpress {{wp_install_dir}} creates={{wp_install_dir}}
+
+- name: Wordpresss | Remove wordpress-{{wp_version}}.tar.gz
+  file: path=/tmp/wordpress-{{wp_version}}.tar.gz state=absent
+
+#rsync -avz --delete  --exclude=.git/ --exclude=.gitignore --progress /opt/wp-repo/ /tmp/wptest/
+
+- name: backup Wordpress folder | Copy site directory to /tmp 
+  command: /bin/cp -r {{ wp_install_dir }} /tmp/site_backup_{{ ansible_date_time.epoch }}
+  tags: deploy
+
+- name: rsync cloned Wordpress repo
+  command: /usr/bin/rsync -avz --delete --exclude=.git/ --exclude=.ansible/ --exclude=.idea/ --exclude=.gitignore --exclude=uploads --progress "{{ wp_repo_clone_home }}/wp-repo/" {{ wp_install_dir }}/
+  tags: deploy
+
+- name: Wordpresss | Fetch random salts for wp-config.php
+  local_action: command curl https://api.wordpress.org/secret-key/1.1/salt/
+  sudo: no
+  register: 'wp_salt'
+  tags: deploy
+
+- name: Wordpresss | Copy wp-config.php file
+  template: src=wp-config.php.j2 dest={{wp_install_dir}}/wp-config.php
+  tags: deploy
+
+- name: Wordpresss | Change ownership of installation directory
+  file: path={{wp_install_dir}} owner=root group=root state=directory recurse=yes
+  tags: deploy
+
+- name: Wordpresss | Change ownership of wp-content directory
+  file: path={{wp_install_dir}}/wp-content/ owner=www-data group=www-data state=directory recurse=yes
+  tags: deploy
+  notify: restart apache
+
+- name: Wordpresss | Change ownership of uploads directory
+  file: path={{wp_install_dir}}/wp-content/uploads/ owner=www-data group=www-data state=directory recurse=yes
+  tags: deploy
+  notify: restart apache

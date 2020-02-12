@@ -1,0 +1,70 @@
+- name: Allow lo interface
+  iptables_v2: comment="Allow lo interface" in_interface=lo chain=INPUT jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+
+- name: Allow eth1 interface
+  iptables_v2: comment="Allow eth1 interface" in_interface=eth1 chain=INPUT jump=ACCEPT state=present
+  become: yes
+  when: ansible_eth1 is defined
+  tags:
+        - iptables
+
+- name: True traffic
+  iptables_v2: comment="True traffic" chain=INPUT ctstate=RELATED,ESTABLISHED jump=ACCEPT state=present
+  become: yes
+  tags:
+        - iptables
+
+- name: Allow local adrresess
+  iptables_v2: >
+        comment="Allow local addresess"
+        chain=INPUT
+        source=10.1.0.0/16
+        ctstate=NEW
+        jump=ACCEPT
+        state=present
+  become: yes
+  tags:
+        - iptables
+
+- name: Allow local adrresess
+  iptables_v2: >
+        comment="Allow local addresess"
+        chain=INPUT
+        source=192.168.0.0/16
+        ctstate=NEW
+        jump=ACCEPT
+        state=present
+  become: yes
+  tags:
+        - iptables
+
+- name: Allow NTP traffic
+  iptables_v2: >
+        comment="Allow NTP traffic"
+        chain=INPUT
+        destination_port=123
+        protocol=udp
+        match=udp
+        ctstate=NEW
+        jump=ACCEPT
+        state=present
+  become: yes
+  tags:
+        - iptables
+
+- name: Allow NTP traffic
+  iptables_v2: >
+        comment="Allow NTP traffic"
+        chain=INPUT
+        destination_port=123
+        protocol=tcp
+        match=tcp
+        ctstate=NEW
+        jump=ACCEPT
+        state=absent
+  become: yes
+  tags:
+        - iptables

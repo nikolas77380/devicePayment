@@ -1,0 +1,47 @@
+- name: Check docker is installed
+  become: yes
+  command: which docker
+  register: docker_installed
+  ignore_errors: True
+  changed_when: false
+  tags:
+    - docker
+
+- include: software.yml
+  when: docker_installed.rc|bool
+
+- name: Check docker config dir
+  become: yes
+  file: dest=/root/.docker/ state=directory mode=0750 owner=root group=root
+
+- name: logrotate for docker
+  become: yes
+  copy: src=docker.logrotate dest=/etc/logrotate.d/docker
+  tags:
+    - docker
+    - logrotate
+
+#- name: Check docker config
+#  become: yes
+#  copy: src=private_hub_docker_auth.json dest=/root/.docker/config.json
+
+- name: Remove old images
+  become: yes
+  cron: >
+    name="Remove old images"
+    minute="0"
+    hour="2"
+    user="root"
+    state=present
+    job="docker rmi $(docker images -f "dangling=true" -q) > /dev/null"
+
+- name: Log into DockerHub
+  become: yes
+  docker_login:
+    docker_api_version: 1.12
+    registry: hub.cdp.cc
+    username: jenkins
+    password: jenkins
+    email: devops@sintez.co.za
+
+- include: docker_vm.yml

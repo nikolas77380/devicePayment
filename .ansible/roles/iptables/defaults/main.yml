@@ -1,0 +1,12 @@
+iptables:
+        SSH:
+                dst_port: 22
+                chain:    INPUT
+                proto:    tcp
+                policy:   ACCEPT
+                state:    present
+
+ipset_from_inventory: no
+iptables_flush: no
+iptables_log: no
+

@@ -1,0 +1,28 @@
+- name: software check
+  apt: name={{item}} update_cache=yes
+  become: yes
+  with_items:
+    - postfix
+    - mutt
+  tags:
+    - common
+    - postfix
+
+- name: allow docker relay
+  become: yes
+  command: postconf -e 'mynetworks = 127.0.0.0/8 172.17.0.0/24'
+  changed_when: false
+  tags:
+    - common
+    - postfix
+
+- name: allow docker relay
+  become: yes
+  lineinfile: >
+    dest=/etc/aliases
+    regexp='^root:\s+{{ root_mail_forward }}'
+    line='root: {{ root_mail_forward }}'
+  notify: newaliases
+  tags:
+    - common
+    - postfix

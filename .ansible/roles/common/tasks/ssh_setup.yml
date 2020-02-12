@@ -1,0 +1,33 @@
+- name: check or disallow root SSH access
+  become: yes
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin without-password" state=present
+  tags:
+    - ssh
+
+- name: check or disallow password authentication
+  become: yes
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
+  tags:
+    - ssh
+
+- name: check or disable DNS resolve
+  become: yes
+  action: lineinfile dest=/etc/ssh/sshd_config line="UseDNS no" state=present
+  tags:
+    - ssh
+
+- name: check or disable GSSAPI
+  become: yes
+  action: lineinfile dest=/etc/ssh/sshd_config line="GSSAPIAuthentication no" state=present
+  tags:
+    - ssh
+
+- name: check or change default ssh port to 7272
+  become: yes
+  action: lineinfile dest=/etc/ssh/sshd_config backrefs=yes regexp="^Port 22" line="Port 7272" state=present
+  notify:
+    - restart_sshd
+    - write into inventory
+  tags:
+    - ssh
+

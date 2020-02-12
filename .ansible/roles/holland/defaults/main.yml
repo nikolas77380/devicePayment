@@ -1,0 +1,4 @@
+---
+holland_backup_dir: /var/spool/holland
+holland_binlog_position: "no"
+holland_nr_backups_to_keep: 60

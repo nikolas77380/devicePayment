@@ -1,0 +1,8 @@
+DOCKER_API_VERS:       "{{DOCKER.API.VERSION}}"
+DOCKER_detach:         yes
+DOCKER_state:          present
+DOCKER_restart_policy: always
+DOCKER_env:
+  LOG_LEVEL:           "{{LOG_LEVEL}}"
+DOCKER_volumes:
+  - "/srv/{{DOCKER_name}}/data:/data"

@@ -1,0 +1,31 @@
+---
+
+- name: Create virtual machine "{{ VSPHERE_vm_name }}" by cloning "{{ VSPHERE_template }}" template
+  vsphere_guest:
+    vcenter_hostname: "{{ VSPHERE_host }}"
+    username:         "{{ VSPHERE_user }}"
+    password:         "{{ VSPHERE_passwd }}"
+    guest:            "{{ VSPHERE_vm_name }}"
+    from_template: yes
+    template_src:     "{{ VSPHERE_template }}"
+    validate_certs: False
+    cluster: "Sintez"
+    resource_pool: "/Resources"
+    vm_extra_config:
+      folder:         "{{ VSPHERE_vm_folder }}"
+
+- pause: seconds=60
+
+- name: Get ip address of the created virtual machine "{{ VSPHERE_vm_name }}"
+  vsphere_guest:
+    vcenter_hostname: "{{ VSPHERE_host }}"
+    username:         "{{ VSPHERE_user }}"
+    password:         "{{ VSPHERE_passwd }}"
+    guest:            "{{ VSPHERE_vm_name }}"
+    vmware_guest_facts: yes
+    validate_certs: False
+  register: vm_facts
+
+- set_fact: ipv4address="{{ vm_facts.ansible_facts.hw_eth0.ipaddresses[0] }}"
+
+- debug: var=vm_facts

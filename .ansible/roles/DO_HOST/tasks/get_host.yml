@@ -1,0 +1,28 @@
+- name: Get ip or create "{{DO_DROPLET_NAME}}" droplet
+  digital_ocean_v2: >
+    state={{STATE}}
+    command={{DO_DROPLET_COMMAND}}
+    size_slug={{DO_DROPLET_SIZE}}
+    region_slug={{DO_DROPLET_REGION}}
+    image_slug={{DO_DROPLET_IMAGE}}
+    name="{{DO_DROPLET_NAME}}"
+    ssh_keys={{DO_DROPLET_SSH_KEYS}}
+    api_token={{DO_API_TOKEN}}
+    unique_name={{DO_DROPLET_UNIQUE_NAME}}
+    wait_timeout={{DO_WAIT_TIMEOUT}}
+    private_networking={{DO_DROPLET_PRIVATE_NETWORK}}
+  register: do
+  ignore_errors: yes
+  tags:
+    - droplet
+
+- name: Wait this host
+  wait_for: host="{{item.ip_address}}" port=22
+  when: item.type == 'public' and STATE != 'absent'
+  with_items:
+    - "{{do.droplet.networks.v4}}"
+  tags:
+    - droplet
+
+- include: inventory_add.yml
+  when: STATE != 'absent'

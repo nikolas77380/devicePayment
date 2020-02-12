@@ -1,0 +1,6 @@
+- hosts: all:!localhost
+  vars_files:
+    - "files/SECRET.yml"
+    - "{{inventory_file}}.conf"
+  roles:
+    - iptables

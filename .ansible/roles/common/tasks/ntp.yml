@@ -1,0 +1,29 @@
+---
+
+- block:
+
+    - name: Check ntp package
+      apt: name={{ item }} state=present
+      with_items:
+        - ntp
+        - ntpdate
+
+    - name: Configure ntp service
+      template: src=ntp.conf.j2 dest=/etc/ntp.conf
+      notify:
+        - restart ntp
+
+    - name: Ensure ntp service is running
+      service: name=ntp state=running enabled=yes pattern='/ntpd'
+
+    - name: Time sync
+      cron: >
+        name="Time sync"
+        minute="0"
+        user="root"
+        state=present
+        job="(SHELL=/bin/bash; service ntp stop; /usr/sbin/ntpdate pool.ntp.org; service ntp start; ) > /dev/null 2>&1"
+
+  become: yes
+  tags:
+    - ntp

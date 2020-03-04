@@ -349,7 +349,12 @@ function track_subscription( $order_id ) {
 	$order_data = $order->get_data();
 	$device_id = get_post_meta( $order_id, 'device_id', true );
 	$email = $order_data['billing']['email'];
-
+	$data = json_encode(array(
+		"id" => $device_id,
+			"email" => $email,
+			"optype" => "1",
+			"status" => "1"
+	));
     $post_request = wp_remote_request( $url, array(
 		'httpversion' => '1.0',
 		'blocking'    => true,
@@ -357,14 +362,6 @@ function track_subscription( $order_id ) {
 			'Content-Type' => 'application/json'
 		),
 		'method' => 'POST',
-		'body' => json_encode(array(
-			"id" => $device_id,
-			"email" => $email,
-			"optype" => "1",
-			"status" => "1"
-		)), 
-		'cookies' => array()
+		'body' => $data
 	) );
-	// print_r();
-    print_r($post_request);die();
 }

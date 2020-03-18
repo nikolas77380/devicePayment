@@ -231,7 +231,8 @@ function custom_override_checkout_fields( $fields ) {
     'placeholder'   => _x('Device Id', 'Device Id', 'woocommerce'),
     'required'  => true,
     'class'     => array('form-row-wide'),
-    'clear'     => true
+	'clear'     => true,
+	'readonly'=>'readonly'
      );
 
      return $fields;
@@ -268,6 +269,7 @@ function wpb_hook_javascript() {
 				if (device_id) {
 					const deviceIdBlock = document.getElementById('device_id');
 					deviceIdBlock.value = device_id;
+					document.getElementById('device_id').setAttribute("readonly", "true");
 				}
 			})
 		//plugin code
@@ -364,4 +366,28 @@ function track_subscription( $order_id ) {
 		'method' => 'POST',
 		'body' => $data
 	) );
+}
+
+add_action( 'woocommerce_after_checkout_validation', 'misha_validate_fname_lname', 10, 2);
+ 
+function misha_validate_fname_lname( $fields, $errors ){
+$url = 'https://srv.mbtech.pro/pmt_sts/idcheck.php';
+$data = json_encode(array(
+        "id" => $fields[ 'device_id' ],
+                "optype" => "idchk",
+));
+$post_request = wp_remote_request( $url, array(
+        'httpversion' => '1.0',
+        'blocking'    => true,
+        'headers'     => array(
+                'Content-Type' => 'application/json'
+        ),
+        'method' => 'POST',
+        'body' => $data
+) ); 
+$result = json_decode(wp_remote_retrieve_body($post_request));
+
+    if ( $result->message == 'false' ){
+        $errors->add( 'validation', 'Device id not exists! Please check your device id' );
+    }
 }
